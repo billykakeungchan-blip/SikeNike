@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SikeNike - Hide & Seek</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="game-container">
+    <header id="game-header">
+      <h1>SikeNike</h1>
+      <div id="phase-display">
+        <span id="phase-text">Get Ready!</span>
+        <span id="timer">30</span>
+      </div>
+      <div id="instructions">
+        <p id="instruction-text">Pick 1-4 hiders. Use staircases for all 8 levels, and touch K to unlock any secret S door.</p>
+      </div>
+      <div id="hud">
+        <div id="level-indicator">Ground</div>
+        <div id="player-status"></div>
+        <button id="lock-btn" class="hidden-ui" type="button">Lock Hiding Spot</button>
+      </div>
+    </header>
+
+    <main id="game-main">
+      <input type="text" id="keyboard-capture" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="-1" aria-hidden="true" />
+      <canvas id="game-canvas" tabindex="0"></canvas>
+      <div id="controls">
+        <button type="button" class="ctrl-btn" id="ctrl-up" data-key="ArrowUp">▲</button>
+        <button type="button" class="ctrl-btn" id="ctrl-left" data-key="ArrowLeft">◀</button>
+        <button type="button" class="ctrl-btn" id="ctrl-down" data-key="ArrowDown">▼</button>
+        <button type="button" class="ctrl-btn" id="ctrl-right" data-key="ArrowRight">▶</button>
+      </div>
+      <div id="overlay" class="active">
+        <div id="start-screen">
+          <h2>Welcome to SikeNike</h2>
+          <p>From 1 to 4 hiders take turns hiding while the bot seeker hunts them down.</p>
+          <p>Each hider gets 30 seconds to choose a spot. Once locked, they cannot move again.</p>
+          <p>There are 8 levels: basement 2, basement 1, ground, level 1, level 2, level 3, level 4, and roof. Right stairs go up, left stairs go down.</p>
+          <p>Each floor has a K tile. Touch K to change that floor's secret door from locked S to open O for the current turn.</p>
+          <p>The seeker then has 3 minutes to find everyone.</p>
+          <label for="player-count">Hiders</label>
+          <select id="player-count">
+            <option value="1">1 Hider</option>
+            <option value="2">2 Hiders</option>
+            <option value="3">3 Hiders</option>
+            <option value="4">4 Hiders</option>
+          </select>
+          <button id="start-btn">Start Game</button>
+        </div>
+        <div id="turn-screen" class="hidden">
+          <h2 id="turn-title">Hider 1</h2>
+          <p id="turn-message">Player 1, choose a hiding place. Everyone else look away.</p>
+          <button id="continue-btn">Start Turn</button>
+        </div>
+        <div id="end-screen" class="hidden">
+          <h2 id="end-title">Game Over</h2>
+          <p id="end-message"></p>
+          <button id="restart-btn">Play Again</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/game.js"></script>
+</body>
+</html>
