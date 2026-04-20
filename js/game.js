@@ -19,6 +19,11 @@ const playerCountEl = document.getElementById('player-count');
 const keyboardCaptureEl = document.getElementById('keyboard-capture');
 const controlsEl = document.getElementById('controls');
 const levelIndicatorEl = document.getElementById('level-indicator');
+const isTouchDevice = typeof window !== 'undefined' && (
+  'ontouchstart' in window ||
+  (navigator.maxTouchPoints || 0) > 0 ||
+  window.matchMedia('(pointer: coarse)').matches
+);
 
 const TILE_SIZE = 32;
 const MAP_WIDTH = 34;
@@ -409,6 +414,12 @@ function logSeekerEvent(type, details = {}) {
 function initCanvas() {
   canvas.width = CANVAS_WIDTH;
   canvas.height = CANVAS_HEIGHT;
+}
+
+function focusKeyboardCapture() {
+  // Avoid forcing hidden input focus on touch devices.
+  if (isTouchDevice) return;
+  keyboardCaptureEl.focus();
 }
 
 function createGrid(fillValue) {
@@ -1547,12 +1558,12 @@ function beginHideTurn(index) {
   phase = 'hide';
   phaseTimeLeft = HIDE_TURN_DURATION;
   phaseTextEl.textContent = `HIDE ${index + 1}`;
-  instructionTextEl.textContent = `Hider ${index + 1}: touch K to unlock S into O on this turn. Right stairs go up, left stairs go down.`;
+  instructionTextEl.textContent = `Hider ${index + 1}: use arrows or tap the map to move. Touch K to unlock S into O on this turn. Right stairs go up, left stairs go down.`;
   setControlsEnabled(true);
   updatePlayerStatus();
   updateLevelIndicator();
   hideOverlay();
-  keyboardCaptureEl.focus();
+  focusKeyboardCapture();
 }
 
 function beginSeekPhase() {
@@ -2029,7 +2040,7 @@ function init() {
   });
 
   keyboardCaptureEl.addEventListener('blur', () => {
-    if (gameState === 'playing') keyboardCaptureEl.focus();
+    if (gameState === 'playing') focusKeyboardCapture();
   });
 
   document.querySelectorAll('.ctrl-btn').forEach((btn) => {
@@ -2050,24 +2061,48 @@ function init() {
       setPressed(false, event);
       event.preventDefault();
     }, { passive: false });
+    btn.addEventListener('touchcancel', (event) => {
+      setPressed(false, event);
+      event.preventDefault();
+    }, { passive: false });
   });
 
-  canvas.addEventListener('click', (event) => {
+  const setHiderTapTarget = (clientX, clientY) => {
     const hider = getActiveHider();
     if (!hider || gameState !== 'playing') return;
 
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-    const x = (event.clientX - rect.left) * scaleX;
-    const y = (event.clientY - rect.top) * scaleY;
+    const x = (clientX - rect.left) * scaleX;
+    const y = (clientY - rect.top) * scaleY;
 
     if (!isWall(hider.level, x, y)) {
       hider.targetX = x;
       hider.targetY = y;
-      keyboardCaptureEl.focus();
+      focusKeyboardCapture();
     }
+  };
+
+  canvas.addEventListener('click', (event) => {
+    setHiderTapTarget(event.clientX, event.clientY);
   });
+
+  canvas.addEventListener('touchstart', (event) => {
+    const touch = event.touches[0];
+    if (!touch) return;
+    setHiderTapTarget(touch.clientX, touch.clientY);
+    event.preventDefault();
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', (event) => {
+    const touch = event.touches[0];
+    if (!touch) return;
+    setHiderTapTarget(touch.clientX, touch.clientY);
+    event.preventDefault();
+  }, { passive: false });
+
+  keyboardCaptureEl.readOnly = isTouchDevice;
 
   requestAnimationFrame(gameLoop);
 }
